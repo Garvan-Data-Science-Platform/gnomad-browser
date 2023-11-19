@@ -56,3 +56,9 @@ variable "authorized_networks" {
   type        = list(string)
   default     = []
 }
+
+variable "bucket_force_destroy" {
+  description = "Whether or not to allow Terraform to delete datapipeline and snapshot buckets if they are not empty"
+  type        = string
+  default     = false
+}
