@@ -3,17 +3,18 @@ variable "project_id" {
   type        = string
 }
 
-variable "vpc_module_source" {
-  description = "The URL of repository and specific release of gnomad-vpc module"
-  type        = string
-  default     = "github.com/broadinstitute/tgg-terraform-modules//gnomad-vpc?ref=main"
-}
-
-variable "vpc_sub_module_source" {
-  description = "The URL of repository and specific release of vpc-with-nat-subnet module"
-  type        = string
-  default     = "github.com/broadinstitute/tgg-terraform-modules//vpc-with-nat-subnet?ref=vpc-with-nat-subnet-v1.0.0"
-}
+# Unfortunately cannot use variables in module source blocks
+# variable "vpc_module_source" {
+#   description = "The URL of repository and specific release of gnomad-vpc module"
+#   type        = string
+#   default     = "github.com/broadinstitute/tgg-terraform-modules//gnomad-vpc?ref=main"
+# }
+# 
+# variable "vpc_sub_module_source" {
+#   description = "The URL of repository and specific release of vpc-with-nat-subnet module"
+#   type        = string
+#   default     = "github.com/broadinstitute/tgg-terraform-modules//vpc-with-nat-subnet?ref=vpc-with-nat-subnet-v1.0.0"
+# }
 
 variable "network_name_prefix" {
   description = ""
@@ -21,17 +22,18 @@ variable "network_name_prefix" {
   default     = "gnomad-mynetwork"
 }
 
-variable "gke_module_source" {
-  description = "The URL of repository and specific release of gnomad-browser-infra module"
-  type        = string
-  default     = "github.com/broadinstitute/tgg-terraform-modules//gnomad-browser-infra?ref=main"
-}
-
-variable "gke_sub_module_source" {
-  description = "The URL of repository and specific release of private-gke-cluster module"
-  type        = string
-  default     = "github.com/broadinstitute/tgg-terraform-modules//private-gke-cluster?ref=private-gke-cluster-v1.0.3"
-}
+# Unfortunately cannot use variables in module source blocks
+# variable "gke_module_source" {
+#   description = "The URL of repository and specific release of gnomad-browser-infra module"
+#   type        = string
+#   default     = "github.com/broadinstitute/tgg-terraform-modules//gnomad-browser-infra?ref=main"
+# }
+# 
+# variable "gke_sub_module_source" {
+#   description = "The URL of repository and specific release of private-gke-cluster module"
+#   type        = string
+#   default     = "github.com/broadinstitute/tgg-terraform-modules//private-gke-cluster?ref=private-gke-cluster-v1.0.3"
+# }
 
 variable "deletion_protection" {
   description = "Whether Terraform is prevented from destroying the cluster"
