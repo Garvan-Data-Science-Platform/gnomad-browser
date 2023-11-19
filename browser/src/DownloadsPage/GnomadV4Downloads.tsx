@@ -33,13 +33,13 @@ const exomeChromosomeVcfs = [
   { chrom: '15', size: '10.65 GiB', md5: '63574925084fa8e48dac46185c41975f' },
   { chrom: '16', size: '13.90 GiB', md5: 'ba59445b0fb0f1a1d78df5dc623c40dd' },
   { chrom: '17', size: '17.04 GiB', md5: '5010e1133a4153c34ae3b113c7c97280' },
-  { chrom: '18', size: '4.87 MiB', md5: 'aed2e7e455e35b97a32d4886d94ccaa0' },
+  { chrom: '18', size: '4.87 GiB', md5: 'aed2e7e455e35b97a32d4886d94ccaa0' },
   { chrom: '19', size: '18.14 GiB', md5: '67c40daa48e50bb4ec1ec541570217b0' },
   { chrom: '20', size: '6.9 GiB', md5: '09b0221006b59c1626d8188e909e933d' },
-  { chrom: '21', size: '3.27 MiB', md5: '206afe8d9dbe544697e1b67eee6d2f7f' },
+  { chrom: '21', size: '3.27 GiB', md5: '206afe8d9dbe544697e1b67eee6d2f7f' },
   { chrom: '22', size: '7.31 GiB', md5: '3084349c03194e8cf5063a1e46473248' },
   { chrom: 'X', size: '7.96 GiB', md5: '6d33a288735eda242c473905ccb6743b' },
-  { chrom: 'Y', size: '860.03 MiB', md5: '8c231b75745b6670555915847c9999e8' },
+  { chrom: 'Y', size: '163.66 MiB', md5: 'c8414744cf75fa498e2497a9391eb1ad' },
 ]
 
 const genomeChromosomeVcfs = [
@@ -48,7 +48,7 @@ const genomeChromosomeVcfs = [
   { chrom: '3', size: '56.96 GiB', md5: 'b0c8955adcd44e8757d9bfdb01a2e180' },
   { chrom: '4', size: '53.19 GiB', md5: '9fba0d34f3074100681b74fc489f620b' },
   { chrom: '5', size: '48.64 GiB', md5: '007112b5d72df612dcfb3dc45606dc25' },
-  { chrom: '6', size: '46.86 GiB', md5: '9b0a289a7dc7910f1a79586b8aa62593' },
+  { chrom: '6', size: '46.85 GiB', md5: '9b0a289a7dc7910f1a79586b8aa62593' },
   { chrom: '7', size: '45.95 GiB', md5: '0929e74108e1d7faab3f7e90e8af9410' },
   { chrom: '8', size: '43.03 GiB', md5: '4c6bc15f9d1232f83e89f5305cc1fbab' },
   { chrom: '9', size: '36.36 GiB', md5: '83c85e0d39b0bab7b8223642c8d2dab0' },
@@ -57,7 +57,7 @@ const genomeChromosomeVcfs = [
   { chrom: '12', size: '37.86 GiB', md5: '19d5b3abacf1c6be990b3aa8f6ca2786' },
   { chrom: '13', size: '25.65 GiB', md5: '94c6da5e72d87bf0a714d6b5c1c09272' },
   { chrom: '14', size: '26.02 GiB', md5: '145c7f1710a6b3a90044f3d14912ce4b' },
-  { chrom: '15', size: '24.64 GiB', md5: '3e04c33c6a03f91b1b071dc8c3224f77' },
+  { chrom: '15', size: '24.63 GiB', md5: '3e04c33c6a03f91b1b071dc8c3224f77' },
   { chrom: '16', size: '27.57 GiB', md5: '572a343a3d8629e0579dbd424f5147ad' },
   { chrom: '17', size: '25.17 GiB', md5: 'ac0003ebe2297dd4377c5045bb439c5c' },
   { chrom: '18', size: '21.12 GiB', md5: '4e1b5b41b0bc70c23d43904dd9ff3bb1' },
@@ -65,7 +65,8 @@ const genomeChromosomeVcfs = [
   { chrom: '20', size: '17.49 GiB', md5: 'd3ab3ed3c79c53a4fe15ced300b07ef5' },
   { chrom: '21', size: '11.47 GiB', md5: '4d2e808cbaafcd2ddc7692be0a45a924' },
   { chrom: '22', size: '12.77 GiB', md5: 'd6ba3b18b07423e3a1af56e8405a26c2' },
-  { chrom: 'X', size: '890.03 GiB', md5: 'b77d8f0219fa9a033a6f747d5fef12d9' },
+  { chrom: 'X', size: '37.05 GiB', md5: 'b77d8f0219fa9a033a6f747d5fef12d9' },
+  { chrom: 'Y', size: '890.03 MiB', md5: '8c231b75745b6670555915847c9999e8' },
 ]
 
 const svChromosomeVcfs = [
@@ -119,12 +120,7 @@ const GnomadV4Downloads = () => {
           For more information, read the{' '}
           {/* @ts-expect-error TS(2786) FIXME: 'ExternalLink' cannot be used as a JSX component. */}
           <ExternalLink href="https://gnomad.broadinstitute.org/news/2023-11-gnomad-v4-0">
-            v4 blog post
-          </ExternalLink>
-          , and the{' '}
-          {/* @ts-expect-error TS(2786) FIXME: 'ExternalLink' cannot be used as a JSX component. */}
-          <ExternalLink href="https://storage.googleapis.com/gcp-public-data--gnomad/release/4.0/README.txt">
-            gnomAD v4.0.0 README
+            gnomAD v4.0.0 blog post
           </ExternalLink>
           .
         </p>
@@ -137,7 +133,6 @@ const GnomadV4Downloads = () => {
                 <GetUrlButtons
                   label="Sites Hail Table"
                   path="/release/4.0/ht/exomes/gnomad.exomes.v4.0.sites.ht"
-                  includeAzure={false}
                 />
               </ListItem>
               {exomeChromosomeVcfs.map(({ chrom, size, md5 }) => (
@@ -148,7 +143,6 @@ const GnomadV4Downloads = () => {
                     path={`/release/4.0/vcf/exomes/gnomad.exomes.v4.0.sites.chr${chrom}.vcf.bgz`}
                     size={size}
                     md5={md5}
-                    includeAzure={false}
                   />
                 </ListItem>
               ))}
@@ -163,7 +157,6 @@ const GnomadV4Downloads = () => {
                 <GetUrlButtons
                   label="Sites Hail Table"
                   path="/release/4.0/ht/genomes/gnomad.genomes.v4.0.sites.ht/"
-                  includeAzure={false}
                 />
               </ListItem>
               {genomeChromosomeVcfs.map(({ chrom, size, md5 }) => (
@@ -174,7 +167,6 @@ const GnomadV4Downloads = () => {
                     path={`/release/4.0/vcf/genomes/gnomad.genomes.v4.0.sites.chr${chrom}.vcf.bgz`}
                     size={size}
                     md5={md5}
-                    includeAzure={false}
                   />
                 </ListItem>
               ))}
@@ -191,7 +183,6 @@ const GnomadV4Downloads = () => {
             <GetUrlButtons
               label="Exome coverage Hail Table"
               path="/release/4.0/coverage/exomes/gnomad.exomes.v4.0.coverage.ht"
-              includeAzure={false}
             />
           </ListItem>
           {/* @ts-expect-error TS(2745) FIXME: This JSX tag's 'children' prop expects type 'never... Remove this comment to see the full error message */}
@@ -201,7 +192,6 @@ const GnomadV4Downloads = () => {
               path="/release/4.0/coverage/exomes/gnomad.exomes.v4.0.coverage.summary.tsv.bgz"
               size="3.77 GiB"
               md5="a6955332c9cccae7efb9c95581282a73"
-              includeAzure={false}
             />
           </ListItem>
         </FileList>
@@ -222,8 +212,6 @@ const GnomadV4Downloads = () => {
             <GetUrlButtons
               label="Constraint metrics Hail Table"
               path="/release/v4.0/constraint/gnomad.v4.0.constraint_metrics.ht"
-              includeAWS={false}
-              includeAzure={false}
             />
           </ListItem>
           {/* @ts-expect-error TS(2745) FIXME: This JSX tag's 'children' prop expects type 'never... Remove this comment to see the full error message */}
@@ -231,8 +219,6 @@ const GnomadV4Downloads = () => {
             <GenericDownloadLinks
               label="Constraint metrics TSV"
               path="/release/v4.0/constraint/gnomad.v4.0.constraint_metrics.tsv"
-              includeAWS={false}
-              includeAzure={false}
             />
           </ListItem>
         </FileList>
@@ -253,7 +239,6 @@ const GnomadV4Downloads = () => {
                 path={`/release/4.0/genome_sv/gnomad.v4.0.sv.chr${chrom}.vcf.gz`}
                 size={size}
                 crc32={crc32}
-                includeAzure={false}
               />
             </ListItem>
           ))}
@@ -272,7 +257,6 @@ const GnomadV4Downloads = () => {
             <GenericDownloadLinks
               label="Exome CNV VCF"
               path="/release/4.0/exome_cnv/gnomad.v4.0.cnv.all.vcf.gz"
-              includeAzure={false}
             />
           </ListItem>
           {/* @ts-expect-error TS(2745) FIXME: This JSX tag's 'children' prop expects type 'never... Remove this comment to see the full error message */}
@@ -280,7 +264,6 @@ const GnomadV4Downloads = () => {
             <GenericDownloadLinks
               label="Exome CNV non neuro VCF"
               path="/release/4.0/exome_cnv/gnomad.v4.0.cnv.non_neuro.vcf.gz"
-              includeAzure={false}
             />
           </ListItem>
           {/* @ts-expect-error TS(2745) FIXME: This JSX tag's 'children' prop expects type 'never... Remove this comment to see the full error message */}
@@ -288,7 +271,6 @@ const GnomadV4Downloads = () => {
             <GenericDownloadLinks
               label="Exome CNV non-neuro controls VCF"
               path="/release/4.0/exome_cnv/gnomad.v4.0.cnv.non_neuro_controls.vcf.gz"
-              includeAzure={false}
             />
           </ListItem>
         </FileList>
@@ -302,7 +284,6 @@ const GnomadV4Downloads = () => {
             <GenericDownloadLinks
               label="Exome sex ploidy cutoffs TSV"
               path="/release/4.0/sex_inference/gnomad.exomes.v4.0.sample_qc.sex_inference.ploidy_cutoffs.tsv"
-              includeAzure={false}
             />
           </ListItem>
           {/* @ts-expect-error TS(2745) FIXME: This JSX tag's 'children' prop expects type 'never... Remove this comment to see the full error message */}
@@ -310,7 +291,6 @@ const GnomadV4Downloads = () => {
             <GetUrlButtons
               label="Exome calling intervals Hail Table"
               path="/resources/grch38/intervals/ukb.pad50.broad.pad50.union.interval_list.ht"
-              includeAzure={false}
             />
           </ListItem>
           {/* @ts-expect-error TS(2745) FIXME: This JSX tag's 'children' prop expects type 'never... Remove this comment to see the full error message */}
@@ -318,7 +298,6 @@ const GnomadV4Downloads = () => {
             <GenericDownloadLinks
               label="Exome calling intervals flat file"
               path="/resources/grch38/intervals/ukb.pad50.broad.pad50.union.intervals"
-              includeAzure={false}
             />
           </ListItem>
         </FileList>

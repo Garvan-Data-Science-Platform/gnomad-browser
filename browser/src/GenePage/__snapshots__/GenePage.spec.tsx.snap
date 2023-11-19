@@ -758,7 +758,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
                 className="Select-sc-1lkyg9e-0 ivadCR"
                 id="coverage-metric"
                 onChange={[Function]}
-                value="mean"
+                value="over_20"
               >
                 <optgroup
                   label="Per-base depth of coverage"
@@ -862,7 +862,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
             <div
               className="CoverageTrack__TitlePanel-sc-1kumbsx-4 bwGOoh"
             >
-              Per-base mean depth of coverage
+              Fraction of individuals with coverage over 20
             </div>
           </div>
           <div
@@ -923,7 +923,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
                           dy="0em"
                           x={-8}
                         >
-                          10
+                          0.1
                         </tspan>
                       </text>
                     </svg>
@@ -963,7 +963,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
                           dy="0em"
                           x={-8}
                         >
-                          20
+                          0.2
                         </tspan>
                       </text>
                     </svg>
@@ -1003,7 +1003,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
                           dy="0em"
                           x={-8}
                         >
-                          30
+                          0.3
                         </tspan>
                       </text>
                     </svg>
@@ -1043,7 +1043,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
                           dy="0em"
                           x={-8}
                         >
-                          40
+                          0.4
                         </tspan>
                       </text>
                     </svg>
@@ -1083,7 +1083,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
                           dy="0em"
                           x={-8}
                         >
-                          50
+                          0.5
                         </tspan>
                       </text>
                     </svg>
@@ -1123,7 +1123,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
                           dy="0em"
                           x={-8}
                         >
-                          60
+                          0.6
                         </tspan>
                       </text>
                     </svg>
@@ -1163,7 +1163,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
                           dy="0em"
                           x={-8}
                         >
-                          70
+                          0.7
                         </tspan>
                       </text>
                     </svg>
@@ -1203,7 +1203,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
                           dy="0em"
                           x={-8}
                         >
-                          80
+                          0.8
                         </tspan>
                       </text>
                     </svg>
@@ -1243,7 +1243,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
                           dy="0em"
                           x={-8}
                         >
-                          90
+                          0.9
                         </tspan>
                       </text>
                     </svg>
@@ -1283,7 +1283,7 @@ exports[`GenePage with CNV dataset "gnomad_cnv_r4" has no unexpected changes 1`]
                           dy="0em"
                           x={-8}
                         >
-                          100
+                          1.0
                         </tspan>
                       </text>
                     </svg>
@@ -6594,7 +6594,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
                 className="Select-sc-1lkyg9e-0 ivadCR"
                 id="coverage-metric"
                 onChange={[Function]}
-                value="mean"
+                value="over_20"
               >
                 <optgroup
                   label="Per-base depth of coverage"
@@ -6698,7 +6698,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
             <div
               className="CoverageTrack__TitlePanel-sc-1kumbsx-4 bwGOoh"
             >
-              Per-base mean depth of coverage
+              Fraction of individuals with coverage over 20
             </div>
           </div>
           <div
@@ -6759,7 +6759,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
                           dy="0em"
                           x={-8}
                         >
-                          10
+                          0.1
                         </tspan>
                       </text>
                     </svg>
@@ -6799,7 +6799,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
                           dy="0em"
                           x={-8}
                         >
-                          20
+                          0.2
                         </tspan>
                       </text>
                     </svg>
@@ -6839,7 +6839,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
                           dy="0em"
                           x={-8}
                         >
-                          30
+                          0.3
                         </tspan>
                       </text>
                     </svg>
@@ -6879,7 +6879,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
                           dy="0em"
                           x={-8}
                         >
-                          40
+                          0.4
                         </tspan>
                       </text>
                     </svg>
@@ -6919,7 +6919,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
                           dy="0em"
                           x={-8}
                         >
-                          50
+                          0.5
                         </tspan>
                       </text>
                     </svg>
@@ -6959,7 +6959,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
                           dy="0em"
                           x={-8}
                         >
-                          60
+                          0.6
                         </tspan>
                       </text>
                     </svg>
@@ -6999,7 +6999,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
                           dy="0em"
                           x={-8}
                         >
-                          70
+                          0.7
                         </tspan>
                       </text>
                     </svg>
@@ -7039,7 +7039,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
                           dy="0em"
                           x={-8}
                         >
-                          80
+                          0.8
                         </tspan>
                       </text>
                     </svg>
@@ -7079,7 +7079,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
                           dy="0em"
                           x={-8}
                         >
-                          90
+                          0.9
                         </tspan>
                       </text>
                     </svg>
@@ -7119,7 +7119,7 @@ exports[`GenePage with SV dataset "gnomad_sv_r4" has no unexpected changes 1`] =
                           dy="0em"
                           x={-8}
                         >
-                          100
+                          1.0
                         </tspan>
                       </text>
                     </svg>
@@ -7625,12 +7625,12 @@ exports[`GenePage with non-SV dataset "exac" has no unexpected changes 1`] = `
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r4"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v4.0
             </a>
           </li>
           <li
@@ -9557,7 +9557,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
                 className="Select-sc-1lkyg9e-0 ivadCR"
                 id="coverage-metric"
                 onChange={[Function]}
-                value="mean"
+                value="over_20"
               >
                 <optgroup
                   label="Per-base depth of coverage"
@@ -9661,7 +9661,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
             <div
               className="CoverageTrack__TitlePanel-sc-1kumbsx-4 bwGOoh"
             >
-              Per-base mean depth of coverage
+              Fraction of individuals with coverage over 20
             </div>
           </div>
           <div
@@ -9722,7 +9722,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
                           dy="0em"
                           x={-8}
                         >
-                          10
+                          0.1
                         </tspan>
                       </text>
                     </svg>
@@ -9762,7 +9762,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
                           dy="0em"
                           x={-8}
                         >
-                          20
+                          0.2
                         </tspan>
                       </text>
                     </svg>
@@ -9802,7 +9802,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
                           dy="0em"
                           x={-8}
                         >
-                          30
+                          0.3
                         </tspan>
                       </text>
                     </svg>
@@ -9842,7 +9842,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
                           dy="0em"
                           x={-8}
                         >
-                          40
+                          0.4
                         </tspan>
                       </text>
                     </svg>
@@ -9882,7 +9882,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
                           dy="0em"
                           x={-8}
                         >
-                          50
+                          0.5
                         </tspan>
                       </text>
                     </svg>
@@ -9922,7 +9922,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
                           dy="0em"
                           x={-8}
                         >
-                          60
+                          0.6
                         </tspan>
                       </text>
                     </svg>
@@ -9962,7 +9962,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
                           dy="0em"
                           x={-8}
                         >
-                          70
+                          0.7
                         </tspan>
                       </text>
                     </svg>
@@ -10002,7 +10002,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
                           dy="0em"
                           x={-8}
                         >
-                          80
+                          0.8
                         </tspan>
                       </text>
                     </svg>
@@ -10042,7 +10042,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
                           dy="0em"
                           x={-8}
                         >
-                          90
+                          0.9
                         </tspan>
                       </text>
                     </svg>
@@ -10082,7 +10082,7 @@ exports[`GenePage with non-SV dataset "gnomad_cnv_r4" has no unexpected changes 
                           dy="0em"
                           x={-8}
                         >
-                          100
+                          1.0
                         </tspan>
                       </text>
                     </svg>
@@ -10588,12 +10588,12 @@ exports[`GenePage with non-SV dataset "gnomad_r2_1" has no unexpected changes 1`
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r2_1"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v2.1
             </a>
           </li>
           <li
@@ -12176,12 +12176,12 @@ exports[`GenePage with non-SV dataset "gnomad_r2_1_controls" has no unexpected c
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r2_1"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v2.1
             </a>
           </li>
           <li
@@ -13764,12 +13764,12 @@ exports[`GenePage with non-SV dataset "gnomad_r2_1_non_cancer" has no unexpected
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r2_1"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v2.1
             </a>
           </li>
           <li
@@ -15352,12 +15352,12 @@ exports[`GenePage with non-SV dataset "gnomad_r2_1_non_neuro" has no unexpected 
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r2_1"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v2.1
             </a>
           </li>
           <li
@@ -16940,12 +16940,12 @@ exports[`GenePage with non-SV dataset "gnomad_r2_1_non_topmed" has no unexpected
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r2_1"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v2.1
             </a>
           </li>
           <li
@@ -18528,12 +18528,12 @@ exports[`GenePage with non-SV dataset "gnomad_r3" has no unexpected changes 1`] 
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r4"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v4.0
             </a>
           </li>
           <li
@@ -20022,12 +20022,12 @@ exports[`GenePage with non-SV dataset "gnomad_r3_controls_and_biobanks" has no u
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r4"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v4.0
             </a>
           </li>
           <li
@@ -21516,12 +21516,12 @@ exports[`GenePage with non-SV dataset "gnomad_r3_non_cancer" has no unexpected c
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r4"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v4.0
             </a>
           </li>
           <li
@@ -23010,12 +23010,12 @@ exports[`GenePage with non-SV dataset "gnomad_r3_non_neuro" has no unexpected ch
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r4"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v4.0
             </a>
           </li>
           <li
@@ -24504,12 +24504,12 @@ exports[`GenePage with non-SV dataset "gnomad_r3_non_topmed" has no unexpected c
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r4"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v4.0
             </a>
           </li>
           <li
@@ -25998,12 +25998,12 @@ exports[`GenePage with non-SV dataset "gnomad_r3_non_v2" has no unexpected chang
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r4"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v4.0
             </a>
           </li>
           <li
@@ -27492,12 +27492,12 @@ exports[`GenePage with non-SV dataset "gnomad_r4" has no unexpected changes 1`] 
             <a
               className="DatasetSelector__TopLevelNavigationLink-sc-1p2fxbn-1-Link eggTrD"
               data-item="current_sv_dataset"
-              href="/?dataset=gnomad_cnv_r4"
+              href="/?dataset=gnomad_sv_r4"
               onBlur={[Function]}
               onClick={[Function]}
               onKeyDown={[Function]}
             >
-              gnomAD CNVs v4.0
+              gnomAD SVs v4.0
             </a>
           </li>
           <li
