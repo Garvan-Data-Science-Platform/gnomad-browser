@@ -14,7 +14,6 @@ import {
   isLiftoverSource,
   isLiftoverTarget,
   usesGrch37,
-  usesGrch38,
   isV3,
   isV3Subset,
   isV4,
@@ -44,6 +43,7 @@ import VariantPopulationFrequencies from './VariantPopulationFrequencies'
 import VariantRelatedVariants from './VariantRelatedVariants'
 import VariantSiteQualityMetrics from './VariantSiteQualityMetrics'
 import VariantTranscriptConsequences from './VariantTranscriptConsequences'
+import { URLBuilder } from '../DatasetSelector'
 
 const Section = styled.section`
   width: 100%;
@@ -257,6 +257,20 @@ export type Coverage = {
   over_100: number | null
 }
 
+type Liftover = {
+  liftover: {
+    variant_id: string
+  }
+  datasets: string[]
+}
+
+type LiftoverSource = {
+  source: {
+    variant_id: string
+  }
+  datasets: string[]
+}
+
 export type Variant = {
   variant_id: string
   reference_genome: ReferenceGenome
@@ -273,8 +287,8 @@ export type Variant = {
   lof_curations: LofCuration[] | null
   in_silico_predictors: InSilicoPredictor[] | null
   transcript_consequences: TranscriptConsequence[] | null
-  liftover: any[] | null
-  liftover_sources: any[] | null
+  liftover: Liftover[] | null
+  liftover_sources: LiftoverSource[] | null
   multi_nucleotide_variants?: any[]
   caid: string | null
   rsids: string[] | null
@@ -828,6 +842,24 @@ const VariantPage = ({ datasetId, variantId }: VariantPageProps) => {
             pageContent = <VariantPageContent datasetId={datasetId} variant={variant} />
           }
 
+          const datasetLinkWithLiftover: URLBuilder = (currentLocation, toDatasetId) => {
+            const needsLiftoverDisambiguation =
+              (isLiftoverSource(datasetId) && isLiftoverTarget(toDatasetId)) ||
+              (isLiftoverSource(toDatasetId) && isLiftoverTarget(datasetId))
+
+            return needsLiftoverDisambiguation
+              ? {
+                  ...currentLocation,
+                  pathname: `/variant/liftover/${variantId}/${datasetId}/${toDatasetId}`,
+                  search: '',
+                }
+              : {
+                  ...currentLocation,
+                  pathname: `/variant/${variantId}`,
+                  search: `?dataset=${toDatasetId}`,
+                }
+          }
+
           return (
             <React.Fragment>
               <GnomadPageHeading
@@ -835,11 +867,12 @@ const VariantPage = ({ datasetId, variantId }: VariantPageProps) => {
                   // Include ExAC for GRCh37 datasets
                   includeExac: usesGrch37(datasetId),
                   // Include gnomAD versions based on the same reference genome as the current dataset
-                  includeGnomad2: usesGrch37(datasetId),
-                  includeGnomad3: usesGrch38(datasetId),
+                  includeGnomad2: true,
+                  includeGnomad3: true,
                   // Variant ID not valid for SVs
                   includeStructuralVariants: false,
                   includeCopyNumberVariants: false,
+                  urlBuilder: datasetLinkWithLiftover,
                 }}
                 selectedDataset={datasetId}
                 extra={
