@@ -36,10 +36,22 @@ module "gnomad-browser-infra" {
   data_pipeline_bucket_location         = var.default_resource_region
   es_snapshots_bucket_location          = var.default_resource_region
   gke_control_plane_authorized_networks = var.authorized_networks
+  bucket_force_destroy                  = var.bucket_force_destroy
 
   # Ensure vpc is created first
   vpc_network_name                      = module.gnomad-browser-vpc.gnomad_vpc_network_name
   vpc_subnet_name                       = "${module.gnomad-browser-vpc.gnomad_vpc_network_name}-gke"
   depends_on                            = [module.gnomad-browser-vpc]
 
+}
+
+resource "google_artifact_registry_repository" "gnomad-browser" {
+  location      = var.default_resource_region
+  repository_id = var.project_id
+  description   = "gnomAD browser docker registry"
+  format        = "DOCKER"
+
+  docker_config {
+    immutable_tags = true
+  }
 }
