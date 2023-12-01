@@ -20,11 +20,11 @@ from data_pipeline.datasets.gnomad_v2.gnomad_v2_regional_missense_constraint imp
     prepare_gnomad_v2_regional_missense_constraint,
 )
 
-from data_pipeline.pipelines.variant_cooccurrence_counts import (
-    annotate_table_with_variant_cooccurrence_counts,
-    prepare_heterozygous_variant_cooccurrence_counts,
-    prepare_homozygous_variant_cooccurrence_counts,
-)
+# from data_pipeline.pipelines.variant_cooccurrence_counts import (
+#    annotate_table_with_variant_cooccurrence_counts,
+#    prepare_heterozygous_variant_cooccurrence_counts,
+#    prepare_homozygous_variant_cooccurrence_counts,
+# )
 from data_pipeline.data_types.gene import reject_par_y_genes
 
 from data_pipeline.datasets.gnomad_v4.gnomad_v4_constraint import prepare_gnomad_v4_constraint
@@ -223,24 +223,24 @@ pipeline.add_task(
     {"path": "gs://gcp-public-data--gnomad/release/v4.0/constraint/gnomad.v4.0.constraint_metrics.ht"},
 )
 
-pipeline.add_task(
-    "prepare_grch37_heterozygous_variant_cooccurrence_counts",
-    prepare_heterozygous_variant_cooccurrence_counts,
-    f"/{genes_subdir}/genes_grch37_heterozygous_variant_cooccurrence_counts.ht",
-)
-
-pipeline.add_task(
-    "prepare_grch37_homozygous_variant_cooccurrence_counts",
-    prepare_homozygous_variant_cooccurrence_counts,
-    f"/{genes_subdir}/genes_grch37_homozygous_variant_cooccurrence_counts.ht",
-)
-
-pipeline.add_task(
-    "prepare_gnomad_v2_regional_missense_constraint",
-    prepare_gnomad_v2_regional_missense_constraint,
-    f"/{constraint_subdir}/gnomad_v2_regional_missense_constraint.ht",
-    {"path": "gs://gcp-public-data--gnomad/release/2.1.1/regional_missense_constraint/gnomad_v2.1.1_rmc.ht"},
-)
+# pipeline.add_task(
+#    "prepare_grch37_heterozygous_variant_cooccurrence_counts",
+#    prepare_heterozygous_variant_cooccurrence_counts,
+#    f"/{genes_subdir}/genes_grch37_heterozygous_variant_cooccurrence_counts.ht",
+# )
+#
+# pipeline.add_task(
+#    "prepare_grch37_homozygous_variant_cooccurrence_counts",
+#    prepare_homozygous_variant_cooccurrence_counts,
+#    f"/{genes_subdir}/genes_grch37_homozygous_variant_cooccurrence_counts.ht",
+# )
+#
+# pipeline.add_task(
+#    "prepare_gnomad_v2_regional_missense_constraint",
+#    prepare_gnomad_v2_regional_missense_constraint,
+#    f"/{constraint_subdir}/gnomad_v2_regional_missense_constraint.ht",
+#    {"path": "gs://gcp-public-data--gnomad/release/2.1.1/regional_missense_constraint/gnomad_v2.1.1_rmc.ht"},
+# )
 
 ###############################################
 # Annotate genes
@@ -299,25 +299,25 @@ pipeline.add_task(
         "exac_constraint": pipeline.get_task("prepare_exac_constraint"),
         "exac_regional_missense_constraint": pipeline.get_task("prepare_exac_regional_missense_constraint"),
         "gnomad_constraint": pipeline.get_task("prepare_gnomad_v2_constraint"),
-        "gnomad_v2_regional_missense_constraint": pipeline.get_task("prepare_gnomad_v2_regional_missense_constraint"),
+        # "gnomad_v2_regional_missense_constraint": pipeline.get_task("prepare_gnomad_v2_regional_missense_constraint"),
     },
     {"join_on": "preferred_transcript_id"},
 )
 
-pipeline.add_task(
-    "annotate_grch37_genes_step_5",
-    annotate_table_with_variant_cooccurrence_counts,
-    f"/{genes_subdir}/genes_grch37_annotated_5.ht",
-    {
-        "genes_path": pipeline.get_task("annotate_grch37_genes_step_4"),
-        "heterozygous_variant_cooccurrence_counts_path": pipeline.get_task(
-            "prepare_grch37_heterozygous_variant_cooccurrence_counts"
-        ),
-        "homozygous_variant_cooccurrence_counts_path": pipeline.get_task(
-            "prepare_grch37_homozygous_variant_cooccurrence_counts"
-        ),
-    },
-)
+# pipeline.add_task(
+#    "annotate_grch37_genes_step_5",
+#    annotate_table_with_variant_cooccurrence_counts,
+#    f"/{genes_subdir}/genes_grch37_annotated_5.ht",
+#    {
+#        "genes_path": pipeline.get_task("annotate_grch37_genes_step_4"),
+#        "heterozygous_variant_cooccurrence_counts_path": pipeline.get_task(
+#            "prepare_grch37_heterozygous_variant_cooccurrence_counts"
+#        ),
+#        "homozygous_variant_cooccurrence_counts_path": pipeline.get_task(
+#            "prepare_grch37_homozygous_variant_cooccurrence_counts"
+#        ),
+#    },
+# )
 
 pipeline.add_task(
     "annotate_grch38_genes_step_1",
@@ -422,7 +422,7 @@ pipeline.add_task(
 
 pipeline.set_outputs(
     {
-        "genes_grch37": "annotate_grch37_genes_step_5",
+        "genes_grch37": "annotate_grch37_genes_step_4",
         "genes_grch38": "annotate_grch38_genes_step_5",
         "base_transcripts_grch37": "extract_grch37_transcripts",
         "base_transcripts_grch38": "extract_grch38_transcripts",

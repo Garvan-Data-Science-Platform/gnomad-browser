@@ -8,7 +8,10 @@ CLUSTER_NAME:=gnomad-dev
 SUBNET_NAME:=garvan-gnomad-dataproc
 AUTOSCALING_POLICY_NAME:=gnomad-dataproc-scaling
 ENVIRONMENT_TAG:=dev
-DOCKER_TAG:=dev_2023-11-22
+DOCKER_TAG:=dev_2023-11-24
+DEPLOYMENT_STATE:=blue
+READS_INSTANCE_NAME:=readvis-data
+
 
 ### Data Pipeline ###
 
@@ -19,20 +22,23 @@ config:
 	./deployctl config set subnet_name $(SUBNET_NAME)
 	./deployctl config set environment_tag $(ENVIRONMENT_TAG)
 
-# need to do `gcloud auth login` first.
+gcloud-auth:
+	gcloud auth login
+
 dataproc-start:
 	./deployctl dataproc-cluster start $(CLUSTER_NAME)
 
-help:
+dataproc-help:
 	./deployctl data-pipeline run --help
 
-run:
+dataproc-run:
 	./deployctl data-pipeline run --cluster $(CLUSTER_NAME) $(PIPELINE) -- $(PIPELINE_ARGS)
 
 dataproc-stop:
 	./deployctl dataproc-cluster stop $(CLUSTER_NAME)
 
 # https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/autoscaling
+# Adjust for clinvar pipelines: make CLUSTER_NAME="vep85" dataproc-cluster-config
 dataproc-cluster-config: pyspark_scaling.yaml
 	gcloud dataproc autoscaling-policies import $(AUTOSCALING_POLICY_NAME) \
   	--source=./$< \
@@ -41,8 +47,73 @@ dataproc-cluster-config: pyspark_scaling.yaml
 		--autoscaling-policy=$(AUTOSCALING_POLICY_NAME) \
 		--region=$(REGION)
 
-data-clone:
-	gsutil -m rsync -r gs://gcp-public-data--gnomad/release/4.0 $(OUTPUT_BUCKET)/
+dataproc-vep-grch37-start:
+	./deployctl dataproc-cluster start vep85 \
+		--vep GRCh37 \
+		--num-secondary-workers 32
+
+dataproc-vep-grch37-run:
+	./deployctl data-pipeline run --cluster vep85 clinvar_grch37
+
+dataproc-vep-grch37-stop:
+	./deployctl dataproc-cluster stop vep85
+
+dataproc-vep-grch38-start:
+	./deployctl dataproc-cluster start vep105 \
+		--init=gs://gcp-public-data--gnomad/resources/vep/v105/vep105-init.sh \
+		--metadata=VEP_CONFIG_PATH=/vep_data/vep-gcloud.json,VEP_CONFIG_URI=file:///vep_data/vep-gcloud.json,VEP_REPLICATE=us \
+		--master-machine-type n1-highmem-8 \
+		--worker-machine-type n1-highmem-8 \
+		--worker-boot-disk-size=200 \
+		--secondary-worker-boot-disk-size=200 \
+		--num-secondary-workers 16
+
+dataproc-vep-grch38-run:
+	./deployctl data-pipeline run --cluster vep105 clinvar_grch38
+
+dataproc-vep-grch38-stop:
+	./deployctl dataproc-cluster stop vep105
+
+### Reads data  ###
+
+# based upon steps in `reads/reference-data/prepare_readviz_disk_v4.sh
+
+reads-instance-create:
+	gcloud compute instances create $(READS_INSTANCE_NAME) \
+		--machine-type e2-standard-8 \
+		--zone $(ZONE)
+
+reads-disk-create:
+	gcloud compute disks create $(READS_INSTANCE_NAME)-disk \
+		--size=655GB \
+		--type=pd-balanced \
+		--zone $(ZONE)
+
+reads-disk-attach:
+	gcloud compute instances attach-disk $(READS_INSTANCE_NAME) \
+		--disk $(READS_INSTANCE_NAME)-disk \
+		--device-name reads-disk \
+		--zone $(ZONE)
+
+reads-ssh:
+	gcloud compute ssh --zone $(ZONE) $(READS_INSTANCE_NAME) \
+		--project $(PROJECT_ID)
+
+# Format disk because you are not copying from existing snapshot
+#  sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/DEVICE_NAME
+
+reads-upload:
+	gcloud compute scp reads/reference-data/gencode.v39.annotation.bed.bgz --zone $(ZONE) $(READS_INSTANCE_NAME):~/
+	gcloud compute scp reads/reference-data/gencode.v39.annotation.bed.bgz.tbi --zone $(ZONE) $(READS_INSTANCE_NAME):~/
+
+reads-disk-detach:
+	gcloud compute instances detach-disk $(READS_INSTANCE_NAME) \
+		--disk $(READS_INSTANCE_NAME)-disk \
+		--zone $(ZONE)
+
+reads-instance-delete:
+	gcloud compute instances delete $(READS_INSTANCE_NAME) \
+		--zone $(ZONE)
 
 ### Pre-Deployment ###
 
@@ -70,6 +141,31 @@ redis-deploy:
 docker-auth:
 	gcloud auth configure-docker $(REGION)-docker.pkg.dev
 
+### Elasticsearch ###
+
+es-port-forward:
+	kubectl port-forward service/$(CLUSTER_NAME)-es-http 9200
+
+# Cannot set env var in parent shell from within make
+#es-set-password:
+#	ELASTICSEARCH_PASSWORD=$(./deployctl elasticsearch get-password --cluster-name=$(CLUSTER_NAME))
+
+#es-check:
+#	curl -u "elastic:$$ELASICSEARCH_PASSWORD" http://localhost:9200/_cluster/health
+
+# create secret:
+# echo -n "$ELASTICSEARCH_PASSWORD" | gcloud secrets create gnomad-elasticsearch-password --data-file=- --locations=australia-southeast1 --replication-policy=user-managed
+#
+es-secret-add:
+	gcloud secrets add-iam-policy-binding gnomad-elasticsearch-password \
+		--member="serviceAccount:$(PROJECT_ID)-data-pipeline@$(PROJECT_ID).iam.gserviceaccount.com" \
+		--role="roles/secretmanager.secretAccessor"
+
+# from load large datasets page
+es-data-load:
+	./deployctl elasticsearch load-datasets --dataproc-cluster $(PROJECT_ID) gnomad_v4_exome_coverage --cluster-name=$(CLUSTER_NAME)
+
+
 ### Deployment ###
 
 docker:
@@ -78,34 +174,43 @@ docker:
 
 # OPTIONAL ARGS: --browser-tag <BROWSER_IMAGE_TAG> --api-tag <API_IMAGE_TAG>
 deploy-create:
-	./deployctl deployments create --name $(PROJECT_ID) 
-	./deployctl reads-deployments create --name $(PROJECT_ID) 
+	./deployctl deployments create --name $(PROJECT_ID)-$(DEPLOYMENT_STATE) 
+	./deployctl reads-deployments create --name $(PROJECT_ID)-$(DEPLOYMENT_STATE) 
 
 deploy-apply:
-	./deployctl deployments apply $(PROJECT_ID) 
-	./deployctl reads-deployments apply $(PROJECT_ID) 
+	./deployctl deployments apply $(PROJECT_ID)-$(DEPLOYMENT_STATE)
+	./deployctl reads-deployments apply $(PROJECT_ID)-$(DEPLOYMENT_STATE) 
 
 ingress-apply:
-	./deployctl demo apply-ingress $(PROJECT_ID) 
+	./deployctl production apply-ingress $(PROJECT_ID)-$(DEPLOYMENT_STATE)  
 
 ingress-describe:
-	kubectl describe ingress gnomad-ingress-demo-$(PROJECT_ID) 
+	kubectl describe ingress gnomad-ingress-demo-$(PROJECT_ID)-$(DEPLOYMENT_STATE) 
 
 ### Clean up deployment ###
 
 deployments-list:
 	./deployctl deployments list
 
-deployments-clean-local:
-	./deployctl deployments clean $(PROJECT_ID)
-	./deployctl reads-deployments clean $(PROJECT_ID)
+deployments-local-clean:
+	./deployctl deployments clean $(PROJECT_ID)-$(DEPLOYMENT_STATE)
+	./deployctl reads-deployments clean $(PROJECT_ID)-$(DEPLOYMENT_STATE)
 
-deployments-delete-cluster:
-	./deployctl deployments delete $(PROJECT_ID)
-	./deployctl reads-deployments delete $(PROJECT_ID)
+deployments-cluster-delete:
+	./deployctl deployments delete $(PROJECT_ID)-$(DEPLOYMENT_STATE)
+	./deployctl reads-deployments delete $(PROJECT_ID)-$(DEPLOYMENT_STATE)
 
 ingress-get:
 	kubectl get ingress
 
 ingress-delete:
-	kubectl delete ingress gnomad-ingress-demo-$(PROJECT_ID) 
+	kubectl delete ingress gnomad-ingress-demo-$(PROJECT_ID)-$(DEPLOYMENT_STATE) 
+
+### Docker command for running hail locally ###
+hail-docker:
+	docker run -it --rm \
+		-e USERID=$$(id -u) \
+		-e GROUPID=$$(id -g) \
+		-v $$(pwd):/work \
+		--net=host \
+		broadinstitute/dig-loam:hail-0.2.94 bash 
