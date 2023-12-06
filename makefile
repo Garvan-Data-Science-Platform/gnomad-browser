@@ -11,9 +11,10 @@ ENVIRONMENT_TAG:=dev
 DOCKER_TAG:=dev_2023-11-24
 DEPLOYMENT_STATE:=blue
 READS_INSTANCE_NAME:=readvis-data
+LOAD_NODE_POOL_SIZE:=48
 
 
-### Data Pipeline ###
+### Initial Config ###
 
 config:
 	./deployctl config set project $(PROJECT_ID)
@@ -24,6 +25,12 @@ config:
 
 gcloud-auth:
 	gcloud auth login
+
+kube-config:
+	gcloud container clusters get-credentials $(CLUSTER_NAME) \
+		    --zone=$(ZONE)
+
+### Data Pipeline ###
 
 dataproc-start:
 	./deployctl dataproc-cluster start $(CLUSTER_NAME)
@@ -117,10 +124,6 @@ reads-instance-delete:
 
 ### Pre-Deployment ###
 
-kube-config:
-	gcloud container clusters get-credentials $(CLUSTER_NAME) \
-		    --zone=$(ZONE)
-
 eck-create:
 	kubectl create -f https://download.elastic.co/downloads/eck/2.9.0/crds.yaml
 
@@ -130,7 +133,7 @@ eck-apply:
 eck-check:
 	kubectl -n elastic-system logs -f statefulset.apps/elastic-operator
 
-# Check `deployctl_config.json`
+# Check `deploy_config.json`
 
 elastic-create:
 	./deployctl elasticsearch apply --cluster-name=$(CLUSTER_NAME)
@@ -142,26 +145,89 @@ docker-auth:
 	gcloud auth configure-docker $(REGION)-docker.pkg.dev
 
 ### Elasticsearch ###
+# get elasticsearch ip
+es-ip-get:
+	kubectl get service $(PROJECT_ID)-elasticsearch-lb --output=jsonpath="{.status.loadBalancer.ingress[0].ip}"
+
+# bash command to set env var:
+# `-s` is silent (e.g. doesn't print recipe)
+# export ELASTICSEARCH_IP=$(make -s es-ip-get)
+
+# requires pre-deployment steps
+# `deploy/docs/LoadingLargeDatasets.md`
+# create GKE node pool - I tried to add this to deployctl, but need to check the command works first
+#es-gke-node-pool-create:
+#	./deployctl elasticsearch create-gke-node-pool --dry_run
+
+es-gke-node-pool-create:
+	gcloud container node-pools create es-ingest \
+    --cluster $(CLUSTER_NAME) \
+    --zone $(ZONE) \
+    --service-account $(PROJECT_ID)-gke@$(PROJECT_ID).iam.gserviceaccount.com \
+    --num-nodes $(LOAD_NODE_POOL_SIZE) \
+    --machine-type e2-highmem-4 \
+    --enable-autorepair --enable-autoupgrade \
+    --shielded-secure-boot \
+		--shielded-integrity-monitoring \
+    --metadata=disable-legacy-endpoints=true
+
+es-gke-node-pool-add:
+	./deployctl elasticsearch apply --n-ingest-pods=$(LOAD_NODE_POOL_SIZE) --cluster-name=$(CLUSTER_NAME)
+
+es-dataproc-start:
+	./deployctl dataproc-cluster start es --num-preemptible-workers $(LOAD_NODE_POOL_SIZE)
+
+# I'm assuming DATASET refers to a `.ht` file in the datapipeline bucket
+# run with `make DATASET=gnomad_v2_exome_coverage es-load`
+es-load:
+	./deployctl elasticsearch load-datasets --dataproc-cluster es $(DATASET) --cluster-name=$(CLUSTER_NAME)
+
+es-dataproc-stop:
+	./deployctl dataproc-cluster stop es
+
+# move data to persistent pool
+es-index-move:
+	curl -u "elastic:$$ELASTICSEARCH_PASSWORD" \
+		"http://localhost:9200/$(INDEX)/_settings" -XPUT \
+		--header "Content-Type: application/json" \
+		--data @- {"index.routing.allocation.require._name": "$(CLUSTER_NAME)-es-data-*"}
+
+es-index-watch:
+	curl -s -u "elastic:$$ELASTICSEARCH_PASSWORD" "http://localhost:9200/_cat/shards?v" | grep RELOCATING
+
+es-gke-node-pool-remove:
+	./deployctl elasticsearch apply --n-ingest-pods=0 --cluster-name=$(CLUSTER_NAME)
+
+es-gke-node-pool-destroy:
+	gcloud container node-pools delete es-ingest \
+    --cluster $(CLUSTER_NAME) \
+    --zone $(ZONE)
 
 es-port-forward:
 	kubectl port-forward service/$(CLUSTER_NAME)-es-http 9200
 
-# Cannot set env var in parent shell from within make
-#es-set-password:
-#	ELASTICSEARCH_PASSWORD=$(./deployctl elasticsearch get-password --cluster-name=$(CLUSTER_NAME))
-
 #es-check:
 #	curl -u "elastic:$$ELASICSEARCH_PASSWORD" http://localhost:9200/_cluster/health
 
-# create secret:
-# echo -n "$ELASTICSEARCH_PASSWORD" | gcloud secrets create gnomad-elasticsearch-password --data-file=- --locations=australia-southeast1 --replication-policy=user-managed
-#
+es-secret-delete:
+	gcloud secrets delete gnomad-elasticsearch-password
+
+# Cannot set env var in parent shell from within make
+es-secret-get:
+	./deployctl elasticsearch get-password --cluster-name=gnomad-dev
+
+# bash command to set env var with password
+# `-s` is silent (e.g. doesn't print recipe)
+# export ELASTICSEARCH_PASSWORD=$(make -s es-secret-get)
+
+es-secret-create:
+	echo -n "$$ELASTICSEARCH_PASSWORD" | gcloud secrets create gnomad-elasticsearch-password --data-file=- --locations=australia-southeast1 --replication-policy=user-managed
+
 es-secret-add:
 	gcloud secrets add-iam-policy-binding gnomad-elasticsearch-password \
 		--member="serviceAccount:$(PROJECT_ID)-data-pipeline@$(PROJECT_ID).iam.gserviceaccount.com" \
 		--role="roles/secretmanager.secretAccessor"
 
-# from load large datasets page
 es-data-load:
 	./deployctl elasticsearch load-datasets --dataproc-cluster $(PROJECT_ID) gnomad_v4_exome_coverage --cluster-name=$(CLUSTER_NAME)
 
@@ -214,3 +280,12 @@ hail-docker:
 		-v $$(pwd):/work \
 		--net=host \
 		broadinstitute/dig-loam:hail-0.2.94 bash 
+
+### Tidy up ###
+
+unused-disks-list:
+	gcloud compute disks list --filter="-users:*" --format "value(uri())"
+
+unused-disks-delete:
+	gcloud compute disks delete $$(gcloud compute disks list --filter="-users:*" --format "value(uri())")
+
