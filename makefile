@@ -9,9 +9,10 @@ SUBNET_NAME:=garvan-gnomad-dataproc
 AUTOSCALING_POLICY_NAME:=gnomad-dataproc-scaling
 ENVIRONMENT_TAG:=dev
 DOCKER_TAG:=dev_2023-11-24
-DEPLOYMENT_STATE:=blue
+DEPLOYMENT_STATE:=green
 READS_INSTANCE_NAME:=readvis-data
 LOAD_NODE_POOL_SIZE:=48
+READS_DISK_SIZE:=20
 
 
 ### Initial Config ###
@@ -84,6 +85,7 @@ dataproc-vep-grch38-stop:
 ### Reads data  ###
 
 # based upon steps in `reads/reference-data/prepare_readviz_disk_v4.sh
+# use `tabix -p bed gencode.v39.annotation.bed.bgz`
 
 reads-instance-create:
 	gcloud compute instances create $(READS_INSTANCE_NAME) \
@@ -92,7 +94,7 @@ reads-instance-create:
 
 reads-disk-create:
 	gcloud compute disks create $(READS_INSTANCE_NAME)-disk \
-		--size=655GB \
+		--size=$(READS_DISK_SIZE)GB \
 		--type=pd-balanced \
 		--zone $(ZONE)
 
@@ -107,11 +109,24 @@ reads-ssh:
 		--project $(PROJECT_ID)
 
 # Format disk because you are not copying from existing snapshot
-#  sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/DEVICE_NAME
+# ls -l /dev/disk/by-id/google-*
+#
+# sudo mkfs.ext4 -m 0 -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/sdb
+#
+# sudo mkdir -p /mnt/disks/reads/reference
+#
+# sudo mount -o discard,defaults /dev/disk/by-id/google-reads-disk /mnt/disks/reads
+#
+# sudo resize2fs /dev/disk/by-id/google-reads-disk
 
 reads-upload:
 	gcloud compute scp reads/reference-data/gencode.v39.annotation.bed.bgz --zone $(ZONE) $(READS_INSTANCE_NAME):~/
 	gcloud compute scp reads/reference-data/gencode.v39.annotation.bed.bgz.tbi --zone $(ZONE) $(READS_INSTANCE_NAME):~/
+
+# on VM
+# sudo mv ~/gencode* /mnt/disks/reads/reference/
+#
+# sudo umount /mnt/disks/reads
 
 reads-disk-detach:
 	gcloud compute instances detach-disk $(READS_INSTANCE_NAME) \
@@ -186,14 +201,62 @@ es-dataproc-stop:
 	./deployctl dataproc-cluster stop es
 
 # move data to persistent pool
+# remember to do logs indices too
 es-index-move:
 	curl -u "elastic:$$ELASTICSEARCH_PASSWORD" \
 		"http://localhost:9200/$(INDEX)/_settings" -XPUT \
 		--header "Content-Type: application/json" \
 		--data @- {"index.routing.allocation.require._name": "$(CLUSTER_NAME)-es-data-*"}
 
+# if there are errors with 'indexes don't have primary shards' (likely cos of log files left on old temp load node pool). These can be forced to move (with data loss) to a new node with this command:
+#
+#curl -u "elastic:$ELASTICSEARCH_PASSWORD" -XPOST "localhost:9200/_cluster/reroute?pretty" -H 'Content-Type: application/json' -d'
+#{
+#    "commands" : [
+#        {
+#          "allocate_empty_primary" : {
+#                "index" : ".ds-ilm-history-5-2023.12.05-000001",
+#                "shard" : 0,
+#                "node" : "gnomad-dev-es-data-green-0",
+#                "accept_data_loss" : "true"
+#          }
+#        }
+#    ]
+#}
+#'
+# 
+
 es-index-watch:
 	curl -s -u "elastic:$$ELASTICSEARCH_PASSWORD" "http://localhost:9200/_cat/shards?v" | grep RELOCATING
+
+es-aliases-list:
+	curl -u "elastic:$$ELASTICSEARCH_PASSWORD" http://localhost:9200/_cat/aliases
+
+# have issues auto stripping timestamp
+#test:
+#	echo $(echo $(INDEX_NAME) | sed -E "s/-\+[0-9]\{2,4\}//g")
+
+es-alias-add:
+	curl -u "elastic:$$ELASTICSEARCH_PASSWORD" \
+		-XPOST http://localhost:9200/_aliases \
+		--header "Content-Type: application/json" \
+		--data '{"actions": [{"add": {"index": "$(INDEX_NAME)", "alias": "$(ALIAS_NAME)"}}]}'
+
+# set up snapshot bucket
+#curl -u "elastic:$ELASTICSEARCH_PASSWORD" -XPUT http://localhost:9200/_snapshot/backups --header "Content-Type: application/json" --data @- <<EOF
+#{
+#   "type": "gcs",
+#   "settings": {
+#     "bucket": "gnomad-dev-elastic-snaps",
+#     "client": "default",
+#     "compress": true
+#   }
+#}
+#EOF
+
+# create snapshot
+#curl -u "elastic:$ELASTICSEARCH_PASSWORD" -XPUT 'http://localhost:9200/_snapshot/backups/%3Csnapshot-%7Bnow%7BYYYY.MM.dd.HH.mm%7D%7D%3E?pretty'
+
 
 es-gke-node-pool-remove:
 	./deployctl elasticsearch apply --n-ingest-pods=0 --cluster-name=$(CLUSTER_NAME)
@@ -248,7 +311,7 @@ deploy-apply:
 	./deployctl reads-deployments apply $(PROJECT_ID)-$(DEPLOYMENT_STATE) 
 
 ingress-apply:
-	./deployctl production apply-ingress $(PROJECT_ID)-$(DEPLOYMENT_STATE)  
+	./deployctl demo apply-ingress $(PROJECT_ID)-$(DEPLOYMENT_STATE)
 
 ingress-describe:
 	kubectl describe ingress gnomad-ingress-demo-$(PROJECT_ID)-$(DEPLOYMENT_STATE) 
@@ -272,6 +335,9 @@ ingress-get:
 ingress-delete:
 	kubectl delete ingress gnomad-ingress-demo-$(PROJECT_ID)-$(DEPLOYMENT_STATE) 
 
+redis-delete:
+	cd deploy/manifests/redis/ && kubectl delete -k .
+
 ### Docker command for running hail locally ###
 hail-docker:
 	docker run -it --rm \
@@ -289,3 +355,5 @@ unused-disks-list:
 unused-disks-delete:
 	gcloud compute disks delete $$(gcloud compute disks list --filter="-users:*" --format "value(uri())")
 
+unused-disks-delete-alt:
+	gcloud compute disks delete $$(gcloud compute disks list --filter="-users:*" --format "value(uri())")
