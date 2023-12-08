@@ -30,6 +30,14 @@ Data preparation for the gnomAD browser is split into multiple pipelines:
 - gnomad_v3_local_ancestry
 - gnomad_v3_mitochondrial_coverage
 - gnomad_v3_mitochondrial_variants
+- gnomad_v3_short_tandem_repeats
+- gnomad_v3_variants
+- gnomad_v4_cnv_del_burden
+- gnomad_v4_cnv_dup_burden
+- gnomad_v4_cnv_track_percent_callable
+- gnomad_v4_cnvs
+- gnomad_v4_coverage
+- gnomad_v4_variants
 
 The genes pipeline must be run first. The others can be run in any order.
 Within a dataset, the coverage pipeline needs to be run before the variants pipeline.
