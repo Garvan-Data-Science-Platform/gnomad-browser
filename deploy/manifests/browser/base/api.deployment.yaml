@@ -24,13 +24,13 @@ spec:
             - name: PORT
               value: '8000'
             - name: ELASTICSEARCH_URL
-              value: http://gnomad-es-http:9200 # FIXME: This depends on using "gnomad" as the ES cluster name
+              value: http://gnomad-dev-es-http:9200 # FIXME: This depends on using "gnomad" as the ES cluster name
             - name: ELASTICSEARCH_USERNAME
               value: elastic
             - name: ELASTICSEARCH_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: gnomad-es-elastic-user # FIXME: This depends on using "gnomad" as the ES cluster name
+                  name: gnomad-dev-es-elastic-user # FIXME: This depends on using "gnomad" as the ES cluster name
                   key: elastic
             - name: REDIS_HOST
               value: 'redis'

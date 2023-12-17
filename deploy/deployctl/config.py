@@ -14,8 +14,8 @@ class Configuration:
     domain: str = None
     environment_tag: str = None
     authorized_networks: str = "0.0.0.0/0"
-    data_pipeline_output: str = "gs://gnomad-browser-data-pipeline"
-    data_snapshot_bucket: str = "gs://gnomad-browser-elasticsearch-snapshots"
+    data_pipeline_output: str = None
+    subnet_name: str = "gnomad-dataproc"
 
     def __init__(self, config_path):
         self._config_path = config_path
@@ -48,12 +48,15 @@ class Configuration:
     def region(self):
         return self.zone.rsplit("-", maxsplit=1)[0]
 
-    @property
-    def network_name(self):
-        if self.environment_tag:
-            return f"gnomad-{self.environment_tag}"
+    # network_name was previously used in subcommands/setup.py
+    # this has been deprecated in favour of terraform.
+    # Now using explicit 'subnetwork_name' var set at top of config.py
+    # @property
+    # def network_name(self):
+    #    if self.environment_tag:
+    #        return f"gnomad-{self.environment_tag}"
 
-        return "gnomad"
+    #    return "gnomad"
 
     @property
     def ip_address_name(self):
@@ -83,27 +86,27 @@ class Configuration:
 
     @property
     def api_image_repository(self):
-        return f"gcr.io/{self.project}/gnomad-api"
+        return f"{self.region}-docker.pkg.dev/{self.project}/{self.project}/gnomad-api"
 
     @property
     def browser_image_repository(self):
-        return f"gcr.io/{self.project}/gnomad-browser"
+        return f"{self.region}-docker.pkg.dev/{self.project}/{self.project}/gnomad-browser"
 
     @property
     def reads_server_image_repository(self):
-        return f"gcr.io/{self.project}/gnomad-reads-server"
+        return f"{self.region}-docker.pkg.dev/{self.project}/{self.project}/gnomad-reads-server"
 
     @property
     def reads_api_image_repository(self):
-        return f"gcr.io/{self.project}/gnomad-reads-api"
+        return f"{self.region}-docker.pkg.dev/{self.project}/{self.project}/gnomad-reads-api"
 
     @property
     def blog_image_repository(self):
-        return f"gcr.io/{self.project}/gnomad-blog"
+        return f"{self.region}-docker.pkg.dev/{self.project}/{self.project}/gnomad-blog"
 
     @property
     def blog_auth_image_repository(self):
-        return f"gcr.io/{self.project}/gnomad-blog-auth"
+        return f"{self.region}-docker.pkg.dev/{self.project}/{self.project}/gnomad-blog-auth"
 
 
 config = Configuration(_CONFIG_PATH)  # pylint: disable=invalid-name

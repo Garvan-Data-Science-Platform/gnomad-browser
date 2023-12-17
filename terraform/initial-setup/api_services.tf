@@ -8,6 +8,7 @@ module "default-project-services" {
     "dataproc.googleapis.com",
     "cloudfunctions.googleapis.com",
     "compute.googleapis.com",
+    "artifactregistry.googleapis.com",
   ]
 
   disable_dependent_services  = true
