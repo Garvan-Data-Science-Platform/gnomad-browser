@@ -91,7 +91,12 @@ class DownloadTask:
 
             start = time.perf_counter()
             with tempfile.NamedTemporaryFile() as tmp:
-                subprocess.check_call(["curl", "-o", tmp.name, self._url])
+                if self._url.startswith("gs://"):
+                    subprocess.check_call(["gsutil",
+                        "-m",
+                        "cp", self._url, tmp.name])
+                else:
+                    subprocess.check_call(["curl", "-o", tmp.name, self._url])
 
                 if output_path.startswith("gs://"):
                     subprocess.check_call(["gsutil", "cp", tmp.name, output_path])

@@ -14,6 +14,9 @@ READS_INSTANCE_NAME:=readviz-data
 LOAD_NODE_POOL_SIZE:=48
 READS_DISK_SIZE:=20
 
+# Autism CRC related config
+AUTISM_CRC_PROJECT_ID:=autism-crc
+AUTISM_CRC_INPUT_BUCKET:=gs://autism-crc-input-data
 
 ### Initial Config ###
 
@@ -30,6 +33,33 @@ gcloud-auth:
 kube-config:
 	gcloud container clusters get-credentials $(CLUSTER_NAME) \
 		    --zone=$(ZONE)
+
+autism-role-create:
+	gcloud iam roles create bucketAccessNoDelete \
+	    --project $(AUTISM_CRC_PROJECT_ID) \
+	    --title "Bucket access (no delete)" \
+	    --description "This role has only the storage.buckets.list and get permissions" \
+	    --permissions=storage.objects.get,storage.objects.list
+
+autism-role-update:
+	gcloud iam roles update bucketAccessNoDelete \
+	    --project $(AUTISM_CRC_PROJECT_ID) \
+	    --title "Bucket access (no delete)" \
+	    --description "This role has only the storage.buckets.list and get permissions" \
+	    --permissions=storage.objects.get,storage.objects.list
+
+autism-role-delete:
+	gcloud iam roles delete bucketAccessNoDelete \
+	    --project $(AUTISM_CRC_PROJECT_ID) 
+
+autism-role-undelete:
+	gcloud iam roles undelete bucketAccessNoDelete \
+	    --project $(AUTISM_CRC_PROJECT_ID) 
+
+autism-role-apply:
+	gcloud storage buckets add-iam-policy-binding $(AUTISM_CRC_INPUT_BUCKET) \
+		--member=serviceAccount:$(PROJECT_ID)-data-pipeline@gnomad-dev.iam.gserviceaccount.com \
+		--role='projects/$(AUTISM_CRC_PROJECT_ID)/roles/bucketAccessNoDelete'
 
 ### Data Pipeline ###
 
