@@ -92,9 +92,7 @@ class DownloadTask:
             start = time.perf_counter()
             with tempfile.NamedTemporaryFile() as tmp:
                 if self._url.startswith("gs://"):
-                    subprocess.check_call(["gsutil",
-                        "-m",
-                        "cp", self._url, tmp.name])
+                    subprocess.check_call(["gsutil", "-m", "cp", self._url, tmp.name])
                 else:
                     subprocess.check_call(["curl", "-o", tmp.name, self._url])
 
@@ -278,6 +276,6 @@ def run_pipeline(pipeline: Pipeline):
     elif args.force:
         pipeline_args["force_tasks"] = args.force
 
-    hl.init()
+    hl.init(tmp_dir="file:///tmp")
 
     pipeline.run(**pipeline_args)

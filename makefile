@@ -63,6 +63,9 @@ autism-role-apply:
 
 ### Data Pipeline ###
 
+dataproc-list:
+	./deployctl dataproc-cluster list
+
 dataproc-start:
 	./deployctl dataproc-cluster start $(CLUSTER_NAME)
 

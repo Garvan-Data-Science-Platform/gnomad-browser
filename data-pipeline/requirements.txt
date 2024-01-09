@@ -8,3 +8,4 @@ pytest
 ruff
 black
 pyright
+git+https://github.com/Garvan-Data-Science-Platform/gnomad_methods@autism_crc

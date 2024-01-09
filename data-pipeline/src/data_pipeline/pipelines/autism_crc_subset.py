@@ -4,19 +4,22 @@ import hail as hl
 
 from data_pipeline.pipeline import Pipeline, run_pipeline
 
-INPUT_DATA_URL='gs://autism-crc-input-data/autism-crc-original/AutismCRC.vcf.gz'
+INPUT_DATA_URL = "gs://autism-crc-input-data/autism-crc-original/AutismCRC.vcf.gz"
 
 pipeline = Pipeline()
+
 
 def convert_vcf_to_ht(vcf_path):
     input_ht = hl.import_vcf(vcf_path, force_bgz=True, min_partitions=32)
     return input_ht
 
+
 def subset_data(input_ht):
     input_data = hl.read_matrix_table(input_ht)
-    input_data_filtered = input_data.filter_rows(input_data.locus.contig == '22')
+    input_data_filtered = input_data.filter_rows(input_data.locus.contig == "22")
     print(input_data_filtered.count_rows() / input_data.count_rows())
     return input_data_filtered
+
 
 ###############################################
 # Subset dataset to chromosome 22
