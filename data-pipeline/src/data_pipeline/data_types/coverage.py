@@ -7,6 +7,9 @@ from data_pipeline.data_types.locus import x_position
 def prepare_coverage(coverage_path: str, filter_intervals: Optional[List[str]] = None):
     coverage = hl.read_table(coverage_path)
 
+    # Exclude unlocalised / unplaced genome sequences
+    coverage = coverage.filter(~coverage.locus.contig.startswith("GL"))
+
     coverage = coverage.annotate(xpos=x_position(coverage.locus))
 
     coverage_fields = coverage.row.dtype.fields

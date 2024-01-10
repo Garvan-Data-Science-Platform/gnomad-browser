@@ -8,7 +8,12 @@ def normalized_contig(contig: hl.expr.StringExpression) -> hl.expr.StringExpress
 def contig_number(contig: hl.expr.StringExpression) -> hl.expr.Int32Expression:
     return hl.bind(
         lambda contig: (
-            hl.case().when(contig == "X", 23).when(contig == "Y", 24).when(contig == "M", 25).default(hl.int(contig))
+            hl.case()
+            .when(contig == "X", 23)
+            .when(contig == "Y", 24)
+            .when(contig == "M", 25)
+            .when(contig == "MT", 25)  # Equivalent to M
+            .default(hl.int(contig))
         ),
         normalized_contig(contig),
     )
