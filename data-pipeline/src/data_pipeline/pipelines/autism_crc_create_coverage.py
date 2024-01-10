@@ -18,7 +18,7 @@ pipeline = Pipeline()
 pipeline.add_task(
     "prepare_autism_crc_coverage",
     prepare_autism_crc_coverage,
-    "/autism_crc/autism_crc_test_subsetted_coverage.ht",
+    "/autism_crc/autism_crc_coverage.ht",
     {"path": INPUT_DATA_URL},
 )
 
