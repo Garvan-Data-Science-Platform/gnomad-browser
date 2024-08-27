@@ -6,8 +6,8 @@ from data_pipeline.config import PipelineConfig
 from data_pipeline.pipeline import Pipeline, run_pipeline
 from data_pipeline.helpers.write_schemas import write_schemas
 
-from data_pipeline.datasets.gnomad_v4.gnomad_v4_variants import (
-    prepare_gnomad_v4_variants,
+from data_pipeline.datasets.autism_crc.autism_crc_variants import (
+    prepare_autism_crc_variants,
 )
 
 
@@ -28,7 +28,7 @@ from data_pipeline.data_types.variant import (
     annotate_transcript_consequences,
 )
 
-RUN = True
+# RUN = True
 
 pipeline_name = "autism_crc_variants"
 
@@ -45,7 +45,7 @@ pipeline = Pipeline(config=config)
 
 pipeline.add_task(
     name="prepare_autism_crc_variants",
-    task_function=prepare_autism_crc_variants, # TODO: update this function to be exome optional
+    task_function=prepare_autism_crc_variants,
     output_path=f"{output_sub_dir}/autism_crc_subsetted_variants_base.ht",
     inputs={
         # TODO: update this when not using subsetted data AND when not using joined table
@@ -55,7 +55,7 @@ pipeline.add_task(
 
 pipeline.add_task(
     name="annotate_autism_crc_variants",
-    task_function=annotate_variants, # TODO: update this function to be exome optional
+    task_function=annotate_variants,
     output_path=f"{output_sub_dir}/autism_crc_subsetted_variants_annotated_1.ht",
     inputs=(
         {
@@ -69,13 +69,11 @@ pipeline.add_task(
 
 pipeline.add_task(
     name="annotate_autism_crc_transcript_consequences",
-    task_function=annotate_transcript_consequences, # TODO: check if this function cares about exomes
+    task_function=annotate_transcript_consequences,
     output_path=f"{output_sub_dir}/autism_crc_subsetted_variants_annotated_2.ht",
     inputs={
         "variants_path": pipeline.get_task("annotate_autism_crc_variants"),
-        # TODO: check this points to autism genes data
         "transcripts_path": genes_pipeline.get_output("base_transcripts_grch38"),
-        # TODO: check this points to autism genes data
         "mane_transcripts_path": genes_pipeline.get_output("mane_select_transcripts"),
     },
 )
@@ -91,27 +89,27 @@ pipeline.set_outputs({"variants": "annotate_autism_crc_transcript_consequences"}
 ###############################################
 
 if __name__ == "__main__":
-    if RUN:
+    # if RUN:
         run_pipeline(pipeline)
+    
+    #     write_schemas(
+    #         [pipeline],
+    #         os.path.join("/home/msolomon", "schemas"),
+    #         task_names=[
+    #             "prepare_gnomad_v4_variants",
+    #             "annotate_gnomad_v4_variants",
+    #             "annotate_gnomad_v4_transcript_consequences",
+    #         ],
+    #     )
+    #     # copy locally using:
+    #     # gcloud compute scp dp-m:~/schemas . --tunnel-through-iap --recurse
 
-        write_schemas(
-            [pipeline],
-            os.path.join("/home/msolomon", "schemas"),
-            task_names=[
-                "prepare_gnomad_v4_variants",
-                "annotate_gnomad_v4_variants",
-                "annotate_gnomad_v4_transcript_consequences",
-            ],
-        )
-        # copy locally using:
-        # gcloud compute scp dp-m:~/schemas . --tunnel-through-iap --recurse
+    # logger.info("Validating pipeline IO formats")
 
-    logger.info("Validating pipeline IO formats")
-
-#    validate_exome_globals_input(pipeline)
-#    validate_genome_globals_input(pipeline)
-#    validate_exome_variant_input(pipeline)
-#    validate_genome_variant_input(pipeline)
-#    validate_step1_output(pipeline)
-#    validate_step2_output(pipeline)
-#    validate_step3_output(pipeline)
+    # validate_exome_globals_input(pipeline)
+    # validate_genome_globals_input(pipeline)
+    # validate_exome_variant_input(pipeline)
+    # validate_genome_variant_input(pipeline)
+    # validate_step1_output(pipeline)
+    # validate_step2_output(pipeline)
+    # validate_step3_output(pipeline)

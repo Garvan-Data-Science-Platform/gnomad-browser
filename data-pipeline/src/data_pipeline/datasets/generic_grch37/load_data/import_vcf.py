@@ -5,18 +5,18 @@ from gnomad_qc.v2.resources import *
 
 
 def import_vcf(vcf,
-               min_block_size: int = 1536,
-               force_bgz: bool = True,
-               header=None):
+               min_block_size,
+               force_bgz,
+               header):
 
-    hl.init(min_block_size=min_block_size)
+    # hl.init(min_block_size=min_block_size)
 
     mt = hl.import_vcf(
         vcf,
         force_bgz=force_bgz,
         call_fields=["GT", "PGT"],
         header_file=header if header else None,
-    )
+    ).split_multi()
 
     mt = mt.key_rows_by(**hl.min_rep(mt.locus, mt.alleles))
 

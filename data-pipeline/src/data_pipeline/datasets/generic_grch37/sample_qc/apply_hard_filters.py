@@ -1,22 +1,57 @@
-import argparse
-import logging
+# import argparse
+# import logging
 import sys
 
 import hail as hl
-from gnomad.utils.slack import slack_notifications
+# from gnomad.utils.slack import slack_notifications
 
-from gnomad_qc.slack_creds import slack_token
-from gnomad_qc.v2.resources import get_gnomad_data
-from gnomad_qc.v2.resources.sample_qc import *
+# from gnomad_qc.slack_creds import slack_token
+# from gnomad_qc.v2.resources import get_gnomad_data
+# from gnomad_qc.v2.resources.sample_qc import *
 
-logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
-logger = logging.getLogger("unified_sample_qc_a")
-logger.setLevel(logging.INFO)
+# logging.basicConfig(format="%(levelname)s (%(name)s %(lineno)s): %(message)s")
+# logger = logging.getLogger("unified_sample_qc_a")
+# logger.setLevel(logging.INFO)
 
+# functions have two outputs: 
+# qc_mt
+# qc_ht "high_callrate_common_biallelic_snps"
+
+# function moved from below main
+# "Filtering to bi-allelic, high-callrate, common SNPs for sample QC..."
+def filter_for_qc(mt):
+    mt = hl.read_matrix_table(mt)
+    mt = mt.filter_rows(
+        (hl.len(mt.alleles) == 2)
+        & hl.is_snp(mt.alleles[0], mt.alleles[1])
+        & (hl.agg.mean(mt.GT.n_alt_alleles()) / 2 > 0.001)
+        & (hl.agg.fraction(hl.is_defined(mt.GT)) > 0.99)
+    )
+    mt.annotate_cols(callrate=hl.agg.fraction(hl.is_defined(mt.GT))).naive_coalesce(
+        5000
+    )
+    return mt
+
+# Moved up from below main
+def import_metadata(qc_mt, meta_ht):
+    qc_mt = hl.read_matrix_table(qc_mt)
+    meta_ht = hl.import_table(meta_ht, types={
+        "age": hl.tfloat64,
+        "s": hl.tstr, 
+        "freemix": hl.tfloat64,
+        "callrate": hl.tfloat64, 
+        "mean_dp": hl.tfloat64,
+        "median_insert_size": hl.tfloat64, 
+        "releasable_2_1": hl.tbool,
+        "pcr_free": hl.tbool,
+        "pct_chimeras": hl.tfloat64}
+    ).key_by("s")
+    qc_mt = qc_mt.annotate_cols(**meta_ht[qc_mt.s])
+    return qc_mt
 
 def annotate_sex(
     mt: hl.MatrixTable,
-    out_internal_mt_prefix: str,
+    # out_internal_mt_prefix: str,
     male_threshold: float = 0.8,
     female_threshold: float = 0.5,
 ) -> hl.MatrixTable:
@@ -29,6 +64,7 @@ def annotate_sex(
     :return: MatrixTable with imputed sex annotations stashed in column annotation 'sex_check'
     :rtype: MatrixTable
     """
+    mt = hl.read_matrix_table(mt)
     mt = hl.filter_intervals(mt, [hl.parse_locus_interval("X")])
     sex_ht = hl.impute_sex(
         mt.GT,
@@ -36,7 +72,7 @@ def annotate_sex(
         female_threshold=female_threshold,
         male_threshold=male_threshold,
     )
-    sex_ht.export(out_internal_mt_prefix + ".sex_check.txt.bgz")
+    # sex_ht.export(out_internal_mt_prefix + ".sex_check.txt.bgz")
     sex_colnames = ["f_stat", "is_female"]
     sex_ht = sex_ht.select(*sex_colnames)
     mt = mt.annotate_cols(**sex_ht[mt.col_key])
@@ -111,6 +147,36 @@ def make_perm_filters_expr(ht: hl.Table, data_type: str) -> hl.expr.SetExpressio
             ],
         )
     )
+
+def apply_filters(mt):
+    qc_ht = hl.read_matrix_table(mt).cols()
+    # flag_klinefilters on qc_ht (qc_mt.cols())
+    qc_ht = qc_ht.annotate(ambiguous_sex=hl.is_missing(qc_ht.is_female))
+    sex_expr = (
+        hl.case()
+        .when(qc_ht.ambiguous_sex, "ambiguous_sex")
+        .when(qc_ht.is_female, "female")
+        .default("male")
+    )
+    qc_ht = qc_ht.annotate(
+        hard_filters=make_hard_filters_expr(qc_ht, "genomes"),
+        perm_filters=make_perm_filters_expr(qc_ht, "genomes"),
+        sex=sex_expr,
+        data_type="genomes",
+    ).key_by("data_type", "s")
+    return qc_ht
+
+def export_annotations(ht):
+    qc_ht = hl.read_table(ht)
+    # Export annotations to make rank list for relatedness (in final sample QC)
+    colnames = ["pcr_free", "mean_dp", "perm_filters"]
+    rank_ht = qc_ht.filter(hl.len(qc_ht.hard_filters) == 0, keep=True).select(*colnames)
+    (
+        rank_ht.annotate(releasable=(hl.len(rank_ht.perm_filters) == 0))
+        .drop("perm_filters")
+    )
+    return rank_ht
+
 
 
 def main(args):

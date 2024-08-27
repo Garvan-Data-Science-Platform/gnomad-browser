@@ -6,21 +6,21 @@
 from gnomad_qc.v2.resources import *
 
 
-def import_clinvar(clinvar_vcf_path, vep_config, clinvar_ht_path, overwrite: bool = False):
+def import_clinvar(clinvar_vcf_path, vep_config):
     from datetime import datetime
 
     clinvar_ht = hl.import_vcf(
-        clinvar_vcf_path, min_partitions=500, skip_invalid_loci=True
+        clinvar_vcf_path, min_partitions=500, skip_invalid_loci=True, force_bgz=True
     ).rows()
     clinvar_ht = clinvar_ht.annotate_globals(
         imported_on=datetime.now().strftime("%Y-%m-%d")
     )
     clinvar_ht = hl.vep(clinvar_ht, vep_config)
-    clinvar_ht.write(clinvar_ht_path, overwrite)
+    return clinvar_ht
 
 
 # "gs://gnomad/resources/validated_de_novos.txt.bgz"
-def import_de_novos(de_novos_path, overwrite: bool = False):
+def import_de_novos(de_novos_path):
     denovo_ht = hl.import_table(
         de_novos_path, types={"pos": hl.tint32}
     )
@@ -31,42 +31,28 @@ def import_de_novos(de_novos_path, overwrite: bool = False):
         alleles=hl.min_rep(denovo_ht.locus, [denovo_ht.ref, denovo_ht.alt])[1]
     )
     denovo_ht = denovo_ht.drop("ref", "alt").key_by("locus", "alleles")
-    denovo_ht.write("", overwrite)
+    return denovo_ht
 
 # data_path = "gs://gnomad-resources/methylation/source/all_methylation.txt.bgz"
         # "gs://hail-common/references/grch37_to_grch38.over.chain.gz", ref_38
-def import_methylation(all_methylation_path, liftover_path, methylation_sites_ht_path, overwrite: bool = False):
+def import_methylation(all_methylation_path):
     kt = hl.import_table(all_methylation_path, impute=True, min_partitions=100)
     kt = kt.transmute(CHROM=hl.cond(kt["#CHROM"] == "M", "MT", kt["#CHROM"]))
     kt = kt.transmute(locus=hl.locus(kt.CHROM, kt.POS))
-    # kt.key_by("locus").write(methylation_sites_ht_path(), overwrite)
-
-    # ht = hl.read_table(methylation_sites_ht_path())
     ht = kt.key_by("locus")
-    ref_37 = hl.get_reference("GRCh37")
-    ref_38 = hl.get_reference("GRCh38")
-    ref_37.add_liftover(
-        liftover_path, ref_38
-    )
-    ht = ht.annotate(
-        new_locus=hl.liftover(ht.locus, "GRCh38", include_strand=True),
-        old_locus=ht.locus,
-    )
-    ht = ht.key_by(locus=ht.new_locus.result)
-    ht.write(methylation_sites_ht_path, overwrite=overwrite)
+    return ht
 
 
-# vcf_path = "gs://gnomad/raw/source/ExAC.r1.sites.vep.vcf.gz"
-def import_exac_data(exac_path, vep_config, exac_release_sites_ht_path, overwrite: bool = False):
-    vds = hl.import_vcf(exac_path, force_bgz=True, min_partitions=5000).rows()
+# vcf_path = "gs://gcp-public-data--gnomad/legacy/exac_browser/ExAC.r1.sites.vep.vcf.gz"
+# input vcf looks like it already has VEP annotations
+def import_exac_data(exac_path):
+    vds = hl.import_vcf(exac_path, force_bgz=True, min_partitions=5000,array_elements_required=False).rows()
     vds = hl.split_multi_hts(vds)
-    vds = hl.vep(vds, vep_config)
-    vds.write(exac_release_sites_ht_path, overwrite)
-
+    return vds
 
 # "gs://gcp-public-data--gnomad/resources/methylation/cpg.vcf.bgz",
 def import_cpgs(cpg_bgz_path, cpg_sites_ht_path, overwrite: bool = False):
-    hl.import_vcf(
+    return hl.import_vcf(
         min_partitions=20,
     ).rows().write(cpg_sites_ht_path, overwrite)
 
