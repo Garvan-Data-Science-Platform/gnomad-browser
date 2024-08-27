@@ -4,19 +4,17 @@ import sys
 from gnomad_qc.v2.resources import *
 
 
-def import_vcf(vcf,
-               min_block_size,
-               force_bgz,
-               header):
+def import_vcf(vcf):
 
     # hl.init(min_block_size=min_block_size)
 
     mt = hl.import_vcf(
         vcf,
-        force_bgz=force_bgz,
+        force_bgz=True,
         call_fields=["GT", "PGT"],
-        header_file=header if header else None,
-    ).split_multi()
+        header_file=None,
+    )
+    mt = hl.split_multi_hts(mt)
 
     mt = mt.key_rows_by(**hl.min_rep(mt.locus, mt.alleles))
 

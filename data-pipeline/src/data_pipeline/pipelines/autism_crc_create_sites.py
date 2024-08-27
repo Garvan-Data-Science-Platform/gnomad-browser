@@ -21,7 +21,7 @@ pipeline = Pipeline()
 pipeline.add_task(
     "import_autism_vcf",
     import_vcf,
-    "/autism_crc/autism_crc_sites_qc.ht",
+    "/autism_crc/data-prep/autism_crc_sites_qc.ht",
     {
         "vcf": INPUT_DATA_URL,
     },
@@ -61,7 +61,7 @@ pipeline.add_task(
 pipeline.add_task(
     "import_exac_data",
     import_exac_data,
-    "/autism_crc/resources_exac_data.ht",
+    "/autism_crc/data-prep/resources_exac_data.ht",
     {
         "exac_path": "gs://gcp-public-data--gnomad/legacy/exac_browser/ExAC.r1.sites.vep.vcf.gz",
     },
@@ -76,18 +76,18 @@ pipeline.add_task(
 pipeline.add_task(
     "filter_for_qc",
     filter_for_qc,
-    "/autism_crc/autism_crc_filtered_sites_qc.ht",
+    "/autism_crc/data-prep/autism_crc_filtered_sites_qc.ht",
     {
-        "mt": f"{BUCKET}/autism_crc/autism_crc_sites_qc.ht",
+        "mt": f"{BUCKET}/autism_crc/data-prep/autism_crc_sites_qc.ht",
     },
 )
 
 pipeline.add_task(
     "import_metadata",
     import_metadata,
-    "/autism_crc/autism_crc_meta_sites_qc.ht",
+    "/autism_crc/data-prep/autism_crc_meta_sites_qc.ht",
     {
-        "qc_mt": f"{BUCKET}/autism_crc/autism_crc_sites_qc.ht",
+        "qc_mt": f"{BUCKET}/autism_crc/data-prep/autism_crc_sites_qc.ht",
         "meta_ht": f"{BUCKET}/autism_crc/placeholder_subset_metadata.tsv",
 
     },
@@ -96,27 +96,27 @@ pipeline.add_task(
 pipeline.add_task(
     "annotate_sex",
     annotate_sex,
-    "/autism_crc/autism_crc_annotate_sex.ht",
+    "/autism_crc/data-prep/autism_crc_annotate_sex.ht",
     {
-        "mt": f"{BUCKET}/autism_crc/autism_crc_meta_sites_qc.ht",
+        "mt": f"{BUCKET}/autism_crc/data-prep/autism_crc_meta_sites_qc.ht",
     },
 )
 
 pipeline.add_task(
     "apply_filters",
     apply_filters,
-    "/autism_crc/autism_crc_filtered.ht",
+    "/autism_crc/data-prep/autism_crc_filtered.ht",
     {
-        "mt": f"{BUCKET}/autism_crc/autism_crc_annotate_sex.ht",
+        "mt": f"{BUCKET}/autism_crc/data-prep/autism_crc_annotate_sex.ht",
     },
 )
 
 pipeline.add_task(
     "export_annotations",
     export_annotations,
-    "/autism_crc/autism_crc_rank_annotations.ht",
+    "/autism_crc/data-prep/autism_crc_rank_annotations.ht",
     {
-        "ht": f"{BUCKET}/autism_crc/autism_crc_filtered.ht",
+        "ht": f"{BUCKET}/autism_crc/data-prep/autism_crc_filtered.ht",
     },
 )
 
