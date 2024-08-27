@@ -18,69 +18,75 @@ READS_DISK_SIZE:=20
 AUTISM_CRC_PROJECT_ID:=autism-crc
 AUTISM_CRC_INPUT_BUCKET:=gs://autism-crc-input-data
 
-### Initial Config ###
+### Stand up infra
+tf-apply: ## Create infrastructure
+	terraform -chdir=./terraform apply
 
-config:
+tf-destroy: ## Destroy infrastructure
+	terraform -chdir=./terraform destroy
+
+### Initial Config ###
+config: ## Set deployctl config
 	./deployctl config set project $(PROJECT_ID)
 	./deployctl config set zone $(ZONE)
 	./deployctl config set data_pipeline_output $(OUTPUT_BUCKET)
 	./deployctl config set subnet_name $(SUBNET_NAME)
 	./deployctl config set environment_tag $(ENVIRONMENT_TAG)
 
-gcloud-auth:
-	gcloud auth login
+gcloud-auth: ## Authenticate with gcloud
+	gcloud auth login --project $(PROJECT_ID)
 
-kube-config:
+kube-config: ## Configure kubectl
 	gcloud container clusters get-credentials $(CLUSTER_NAME) \
 		    --zone=$(ZONE)
 
-autism-role-create:
+autism-role-create: ## create role to access autism-crc bucket
 	gcloud iam roles create bucketAccessNoDelete \
 	    --project $(AUTISM_CRC_PROJECT_ID) \
 	    --title "Bucket access (no delete)" \
 	    --description "This role has only the storage.buckets.list and get permissions" \
 	    --permissions=storage.objects.get,storage.objects.list
 
-autism-role-update:
+autism-role-update: ## update role to access autism-crc bucket
 	gcloud iam roles update bucketAccessNoDelete \
 	    --project $(AUTISM_CRC_PROJECT_ID) \
 	    --title "Bucket access (no delete)" \
 	    --description "This role has only the storage.buckets.list and get permissions" \
 	    --permissions=storage.objects.get,storage.objects.list
 
-autism-role-delete:
+autism-role-delete: ## delete role to access autism-crc bucket
 	gcloud iam roles delete bucketAccessNoDelete \
 	    --project $(AUTISM_CRC_PROJECT_ID) 
 
-autism-role-undelete:
+autism-role-undelete: ## undelete role to access autism-crc bucket
 	gcloud iam roles undelete bucketAccessNoDelete \
 	    --project $(AUTISM_CRC_PROJECT_ID) 
 
-autism-role-apply:
+autism-role-apply: ## apply role to access autism-crc bucket
 	gcloud storage buckets add-iam-policy-binding $(AUTISM_CRC_INPUT_BUCKET) \
 		--member=serviceAccount:$(PROJECT_ID)-data-pipeline@gnomad-dev.iam.gserviceaccount.com \
 		--role='projects/$(AUTISM_CRC_PROJECT_ID)/roles/bucketAccessNoDelete'
 
 ### Data Pipeline ###
 
-dataproc-list:
+dataproc-list: ## list dataproc clusters
 	./deployctl dataproc-cluster list
 
-dataproc-start:
+dataproc-start: ## start a dataproc cluster
 	./deployctl dataproc-cluster start $(CLUSTER_NAME)
 
-dataproc-help:
+dataproc-help: ## display dataproc help
 	./deployctl data-pipeline run --help
 
-dataproc-run:
+dataproc-run: ## Run a pipeline on dataproc (requires PIPELINE var)
 	./deployctl data-pipeline run --cluster $(CLUSTER_NAME) $(PIPELINE) -- $(PIPELINE_ARGS)
 
-dataproc-stop:
+dataproc-stop: ## stop a dataproc cluster
 	./deployctl dataproc-cluster stop $(CLUSTER_NAME)
 
 # https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/autoscaling
 # Adjust for clinvar pipelines: make CLUSTER_NAME="vep85" dataproc-cluster-config
-dataproc-cluster-config: pyspark_scaling.yaml
+dataproc-cluster-config: pyspark_scaling.yaml ## configure dataproc cluster for autoscaling
 	gcloud dataproc autoscaling-policies import $(AUTOSCALING_POLICY_NAME) \
   	--source=./$< \
     --region=$(REGION) && \
@@ -88,18 +94,21 @@ dataproc-cluster-config: pyspark_scaling.yaml
 		--autoscaling-policy=$(AUTOSCALING_POLICY_NAME) \
 		--region=$(REGION)
 
-dataproc-vep-grch37-start:
+dataproc-vep-grch37-start: ## start vep grch37 dataproc cluster
 	./deployctl dataproc-cluster start vep85 \
 		--vep GRCh37 \
-		--num-secondary-workers 32
+		# --num-secondary-workers 32
 
-dataproc-vep-grch37-run:
+dataproc-vep-grch37-run-clinvar: ## run clinvar_grch37 pipeline on vep cluster
 	./deployctl data-pipeline run --cluster vep85 clinvar_grch37
 
-dataproc-vep-grch37-stop:
+dataproc-vep-grch37-run: ## Run a pipeline on dataproc (requires PIPELINE var)
+	./deployctl data-pipeline run --cluster vep85 $(PIPELINE) -- $(PIPELINE_ARGS)
+
+dataproc-vep-grch37-stop: ## stop vep grch37 dataproc cluster
 	./deployctl dataproc-cluster stop vep85
 
-dataproc-vep-grch38-start:
+dataproc-vep-grch38-start: ## start vep grch38 dataproc cluster
 	./deployctl dataproc-cluster start vep105 \
 		--init=gs://gcp-public-data--gnomad/resources/vep/v105/vep105-init.sh \
 		--metadata=VEP_CONFIG_PATH=/vep_data/vep-gcloud.json,VEP_CONFIG_URI=file:///vep_data/vep-gcloud.json,VEP_REPLICATE=us \
@@ -109,10 +118,10 @@ dataproc-vep-grch38-start:
 		--secondary-worker-boot-disk-size=200 \
 		--num-secondary-workers 16
 
-dataproc-vep-grch38-run:
+dataproc-vep-grch38-run: ## run clinvar_grch38 pipeline on vep cluster
 	./deployctl data-pipeline run --cluster vep105 clinvar_grch38
 
-dataproc-vep-grch38-stop:
+dataproc-vep-grch38-stop: ## stop vep grch38 dataproc cluster
 	./deployctl dataproc-cluster stop vep105
 
 ### Reads data  ###
@@ -120,7 +129,7 @@ dataproc-vep-grch38-stop:
 # based upon steps in `reads/reference-data/prepare_readviz_disk_v4.sh
 # use `tabix -p bed gencode.v39.annotation.bed.bgz`
 
-reads-instance-create:
+reads-instance-create: ## create reads instance
 	gcloud compute instances create $(READS_INSTANCE_NAME) \
 		--machine-type e2-standard-8 \
 		--zone $(ZONE)
@@ -390,3 +399,8 @@ unused-disks-delete:
 
 unused-disks-delete-alt:
 	gcloud compute disks delete $$(gcloud compute disks list --filter="-users:*" --format "value(uri())")
+
+.PHONY: help
+help: ## Display available commands
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk \
+		'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
