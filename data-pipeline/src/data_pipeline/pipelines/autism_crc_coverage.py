@@ -8,15 +8,15 @@ pipeline = Pipeline()
 pipeline.add_task(
     "prepare_autism_crc_coverage",
     prepare_coverage,
-    "/autism_crc/autism_crc_genome_coverage.ht",
-    {"coverage_path": "gs://gnomad-dev-data-pipeline/autism_crc/autism_crc_coverage.ht"},
+    "/autism_crc/autism_crc_genome_coverage_subset_computed.ht",
+    {"coverage_path": "gs://gnomad-dev-data-pipeline/autism_crc/autism_crc_coverage_subset.ht"},
 )
 
 ###############################################
 # Outputs
-###############################################
+##############################################
 
-pipeline.set_outputs({"genome_coverage": "prepare_autism_crc_coverage"})
+pipeline.set_outputs({"coverage": "prepare_autism_crc_coverage"})
 
 ###############################################
 # Run

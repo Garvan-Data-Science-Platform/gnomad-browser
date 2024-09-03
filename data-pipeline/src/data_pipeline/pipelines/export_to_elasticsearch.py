@@ -46,6 +46,8 @@ from data_pipeline.pipelines.gnomad_v4_cnv_track_percent_callable import pipelin
 from data_pipeline.pipelines.gnomad_v4_cnv_del_burden import pipeline as gnomad_v4_cnv_del_burden
 
 from data_pipeline.pipelines.gnomad_v4_cnv_dup_burden import pipeline as gnomad_v4_cnv_dup_burden
+from data_pipeline.pipelines.autism_crc_coverage import pipeline as autism_crc_coverage_pipeline
+from data_pipeline.pipelines.autism_crc_variants import pipeline as autism_crc_variants_pipeline
 
 
 logger = logging.getLogger("gnomad_data_pipeline")
@@ -482,6 +484,35 @@ DATASETS_CONFIG = {
             "index": "gnomad_v3_genomic_constraint_regions",
             "id_field": "element_id",
         },
+    },
+    ##############################################################################################################
+    # autism_crc
+    ##############################################################################################################
+    "autism_crc_variants": {
+        "get_table": lambda: subset_table(
+            add_variant_document_id(hl.read_table(autism_crc_variants_pipeline.get_output("variants").get_output_path()))
+        ),
+        "args": {
+            "index": "autism_crc_variants",
+            "index_fields": [
+                "document_id",
+                "variant_id",
+                "rsids",
+                "caid",
+                "locus",
+                "transcript_consequences.gene_id",
+                "transcript_consequences.transcript_id",
+            ],
+            "id_field": "document_id",
+            "num_shards": 48,
+            "block_size": 1_000,
+        },
+    },
+    "autism_crc_coverage": {
+        "get_table": lambda: subset_table(
+            hl.read_table(autism_crc_coverage_pipeline.get_output("coverage").get_output_path())
+        ),
+        "args": {"index": "autism_crc_coverage", "id_field": "xpos", "num_shards": 48, "block_size": 10_000},
     },
 }
 

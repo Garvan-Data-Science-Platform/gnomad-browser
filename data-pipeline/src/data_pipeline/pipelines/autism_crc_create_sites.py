@@ -1,5 +1,6 @@
 # Pipeline to create sites Autism CRC dataset as precursor for coverage pipeline
 
+import hail as hl
 from data_pipeline.pipeline import Pipeline, run_pipeline
 from data_pipeline.datasets.generic_grch37.load_data.import_vcf import import_vcf
 from data_pipeline.datasets.generic_grch37.load_data.import_resources import (import_clinvar, import_de_novos, import_methylation, import_exac_data)
@@ -11,6 +12,9 @@ INPUT_DATA_URL = f"{BUCKET}/autism_crc/AutismCRC.chr22XY.6samples.vcf.gz"
 
 pipeline = Pipeline()
 
+def get_rows(mt):
+    mt = hl.read_matrix_table(mt)
+    return mt.rows()
 
 ###############################################
 # load_data
@@ -68,10 +72,10 @@ pipeline.add_task(
 )
 
 ###############################################
-# load_data
+# sample_qc
 ###############################################
 
-# apply_hard_filters
+# # apply_hard_filters
 
 pipeline.add_task(
     "filter_for_qc",
@@ -120,9 +124,26 @@ pipeline.add_task(
     },
 )
 
+pipeline.add_task(
+    "get_rows",
+    get_rows,
+    "/autism_crc/data-prep/autism_crc_rows.ht",
+    {
+        "mt": f"{BUCKET}/autism_crc/data-prep/autism_crc_filtered.ht",
+    },
+)
+
+# generate_hardcalls.py
+
+# exomes_platform_pca.py
+
+# joint_sample_qc.py
+##
+
 ###############################################
 # Outputs
 ###############################################
+# eline/autism_crc/clinvar.2024-06-24.22XY.vcf.gz",
 
 pipeline.set_outputs({
                      "vcf": "import_autism_vcf",
@@ -134,11 +155,12 @@ pipeline.set_outputs({
                      "import_metadata": "import_metadata",
                      "annotate_sex": "annotate_sex",
                      "apply_filters": "apply_filters",
-                     "export_annotations": "export_annotations",
+                     # "export_annotations": "export_annotations",
+                     "variants": "get_rows",
                  })
-###############################################
+# ###############################################
 # Run
-###############################################
+# ###############################################
 
 if __name__ == "__main__":
     run_pipeline(pipeline)
