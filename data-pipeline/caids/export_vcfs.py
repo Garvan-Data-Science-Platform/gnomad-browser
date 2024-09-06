@@ -28,6 +28,13 @@ def get_gnomad_v2_variants() -> hl.Table:
     ds = ds.repartition(5000, shuffle=True)
     return ds
 
+def get_autism_crc_variants() -> hl.Table:
+    """Get locus/alleles for all autism_crc variants."""
+    ds = hl.read_table("gs://gnomad-dev-data-pipeline/autism_crc/data-prep/autism_crc_rows.ht")
+    ds = ds.select_globals()
+    ds = ds.select()
+    ds = ds.repartition(5000, shuffle=True)
+    return ds
 
 def get_exac_variants() -> hl.Table:
     """Get locus/alleles for all ExAC variants."""
@@ -49,6 +56,8 @@ def get_variants(dataset: str) -> hl.Table:
         return get_gnomad_v3_variants()
     if dataset == "gnomAD v2.1.1":
         return get_gnomad_v2_variants()
+    if dataset == "autism_crc":
+        return get_autism_crc_variants()
     if dataset == "ExAC":
         return get_exac_variants()
     raise ValueError(f"Unknown dataset '{dataset}'")
@@ -76,7 +85,7 @@ def export_vcfs(ds: hl.Table, output_url: str) -> None:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("dataset", choices=("ExAC", "gnomAD v2.1.1", "gnomAD v3.1.1"))
+    parser.add_argument("dataset", choices=("ExAC", "autism_crc", "gnomAD v2.1.1", "gnomAD v3.1.1"))
     parser.add_argument("output_url")
     args = parser.parse_args()
 

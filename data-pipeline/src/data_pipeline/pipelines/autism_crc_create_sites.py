@@ -9,12 +9,18 @@ from data_pipeline.datasets.generic_grch37.sample_qc.apply_hard_filters import (
 
 BUCKET = "gs://gnomad-dev-data-pipeline"
 INPUT_DATA_URL = f"{BUCKET}/autism_crc/AutismCRC.chr22XY.6samples.vcf.gz"
+VEP_CONFIG = f"{BUCKET}/autism_crc/vep85-loftee-gcloud.json"
 
 pipeline = Pipeline()
 
 def get_rows(mt):
     mt = hl.read_matrix_table(mt)
     return mt.rows()
+
+def add_vep(mt):
+    mt = hl.read_table(mt).select()
+    vep = hl.vep(mt, VEP_CONFIG)
+    return vep 
 
 ###############################################
 # load_data
@@ -133,6 +139,14 @@ pipeline.add_task(
     },
 )
 
+pipeline.add_task(
+    "add_vep",
+    add_vep,
+    "/autism_crc/data-prep/autism_crc_vep.ht",
+    {
+        "mt": f"{BUCKET}/autism_crc/data-prep/autism_crc_rows.ht",
+    },
+)
 # generate_hardcalls.py
 
 # exomes_platform_pca.py
@@ -156,7 +170,8 @@ pipeline.set_outputs({
                      "annotate_sex": "annotate_sex",
                      "apply_filters": "apply_filters",
                      # "export_annotations": "export_annotations",
-                     "variants": "get_rows",
+                     "rows": "get_rows",
+                     "variants": "add_vep",
                  })
 # ###############################################
 # Run
